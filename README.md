@@ -18,11 +18,11 @@ The current runnable client is a desktop MVP under `apps/desktop` built with:
 At the moment the desktop app supports:
 
 - Local conversation shell
-- Simulated send / receive flow
+- Real DeerFlow-backed message flow
 - Local workspace folder selection
 - A Codex-inspired dark desktop layout
 
-It does not yet connect to a real backend agent runtime.
+It currently talks directly to DeerFlow and does not yet include a Harbor-owned auth / BFF layer.
 
 ## Repository Structure
 
@@ -49,7 +49,7 @@ The first milestone is a desktop client based on Electron + React.
 - Message send / receive flow
 - Later integration with API Server, Agent Runtime, and local model services
 
-The repository is currently prioritizing the client shell and the core chat flow before backend integration.
+The repository is currently prioritizing DeerFlow integration, then uploads / history recovery, and only after that a Harbor-owned auth layer.
 
 ## Where To Start
 

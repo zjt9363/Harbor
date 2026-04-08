@@ -62,12 +62,12 @@ MVP 阶段默认用户规模较小，以内部试用和验证为主。
 
 1. 用户打开 Harbor 桌面客户端
 2. 用户输入文本，或上传文件/图片
-3. 客户端将请求发送到 API Server
-4. API Server 调用 Agent Runtime
-5. Agent Runtime 调用本地模型服务
+3. 客户端当前直接将请求发送到 DeerFlow
+4. DeerFlow 调用 Agent Runtime
+5. Agent Runtime 调用模型服务
 6. 模型生成回复并返回
 7. 客户端展示结果
-8. 会话、消息、附件信息被保存
+8. 当前 thread 上下文、消息和附件能力由 DeerFlow 承接
 
 这条链路必须优先跑通，并保持稳定。
 
@@ -76,17 +76,15 @@ MVP 阶段默认用户规模较小，以内部试用和验证为主。
 MVP 阶段采用基础分层架构：
 
 - Harbor Desktop Client（Electron + React）
-- API Server
-- OpenClaw Gateway / Agent Runtime
-- Local Model Server（如 vLLM 或 Ollama）
-- PostgreSQL
-- File Storage
+- DeerFlow Gateway / LangGraph
+- Model Provider 或 Local Model Server（如 vLLM / Ollama）
+- 后续再补 Harbor Auth / BFF
 
 架构原则是：
 
-- 先单体集成为主
+- 先直连 DeerFlow 跑通主链路
 - 模型层与业务层解耦
-- 后续可扩展 skill、任务和分析能力
+- 后续可扩展鉴权、skill、任务和分析能力
 
 ## 8. 成功标准
 

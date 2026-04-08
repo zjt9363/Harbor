@@ -16,42 +16,74 @@ type Message = {
 
 type Conversation = {
   id: string
+  threadId: string
   title: string
   updatedAt: string
 }
 
-const initialMessages: Message[] = [
+type BackendState = {
+  status: 'checking' | 'ready' | 'offline'
+  detail: string
+}
+
+const introMessages: Message[] = [
   {
     id: 'm-1',
     role: 'assistant',
-    content: 'Harbor 客户端已经准备好。现在这是一条本地模拟聊天链路，你可以先直接发送消息。',
-  },
-  {
-    id: 'm-2',
-    role: 'assistant',
-    content: '下一步我们可以把这里的模拟回复替换成真实的 Agent Runtime 和本地模型服务。',
+    content: 'Harbor 客户端已经准备好。当前目标是直接连接 DeerFlow，把真实消息链路跑通。',
   },
 ]
 
-const initialConversations: Conversation[] = [
-  {
-    id: 'conv-1',
-    title: '当前会话',
+function createConversation(title = '当前会话'): Conversation {
+  return {
+    id: `conv-${Date.now()}`,
+    threadId: crypto.randomUUID(),
+    title,
     updatedAt: '刚刚',
-  },
-]
+  }
+}
 
 function App() {
   const [workspacePath, setWorkspacePath] = useState('E:\\Agent')
   const [draft, setDraft] = useState('')
-  const [messages, setMessages] = useState<Message[]>(initialMessages)
-  const [conversations, setConversations] = useState<Conversation[]>(initialConversations)
+  const [messages, setMessages] = useState<Message[]>(introMessages)
+  const [conversations, setConversations] = useState<Conversation[]>([createConversation()])
   const [isResponding, setIsResponding] = useState(false)
+  const [backendState, setBackendState] = useState<BackendState>({
+    status: 'checking',
+    detail: 'Checking DeerFlow',
+  })
   const messageEndRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     messageEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, isResponding])
+
+  useEffect(() => {
+    let cancelled = false
+
+    window.harbor.getBackendStatus().then((status) => {
+      if (cancelled) {
+        return
+      }
+
+      setBackendState(
+        status.ok
+          ? {
+              status: 'ready',
+              detail: `DeerFlow Ready · ${status.baseUrl}`,
+            }
+          : {
+              status: 'offline',
+              detail: status.error ?? 'DeerFlow Offline',
+            },
+      )
+    })
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   const handleSelectWorkspace = async () => {
     const selected = await window.harbor.selectWorkspace()
@@ -63,19 +95,13 @@ function App() {
   }
 
   const handleNewConversation = () => {
-    setMessages(initialMessages)
+    setMessages(introMessages)
     setDraft('')
     setIsResponding(false)
-    setConversations([
-      {
-        id: `conv-${Date.now()}`,
-        title: '新会话',
-        updatedAt: '刚刚',
-      },
-    ])
+    setConversations([createConversation('新会话')])
   }
 
-  const handleSend = () => {
+  const handleSend = async () => {
     const content = draft.trim()
     if (!content || isResponding) {
       return
@@ -90,6 +116,14 @@ function App() {
     setMessages((current) => [...current, userMessage])
     setDraft('')
     setIsResponding(true)
+    setBackendState((current) =>
+      current.status === 'offline'
+        ? current
+        : {
+            status: 'checking',
+            detail: 'Waiting for DeerFlow',
+          },
+    )
     setConversations((current) =>
       current.map((conversation, index) =>
         index === 0
@@ -102,16 +136,51 @@ function App() {
       ),
     )
 
-    window.setTimeout(() => {
+    try {
+      const activeConversation = conversations[0]
+      const response = await window.harbor.sendMessage({
+        threadId: activeConversation.threadId,
+        message: content,
+        workspacePath,
+      })
+
       const assistantMessage: Message = {
         id: `assistant-${Date.now()}`,
         role: 'assistant',
-        content: `已收到你的消息：${content}\n\n这是一条本地模拟回复。当前我们已经打通了“发送消息 -> 接收消息 -> 展示消息”的最小客户端链路。`,
+        content: response.reply,
       }
 
       setMessages((current) => [...current, assistantMessage])
+      setConversations((current) =>
+        current.map((conversation, index) =>
+          index === 0
+            ? {
+                ...conversation,
+                title: response.title ?? (content.slice(0, 18) || conversation.title),
+                updatedAt: '刚刚',
+              }
+            : conversation,
+        ),
+      )
+      setBackendState({
+        status: 'ready',
+        detail: 'DeerFlow Ready',
+      })
+    } catch (error) {
+      const assistantMessage: Message = {
+        id: `assistant-${Date.now()}`,
+        role: 'assistant',
+        content: `DeerFlow 请求失败：${error instanceof Error ? error.message : '未知错误。'}`,
+      }
+
+      setMessages((current) => [...current, assistantMessage])
+      setBackendState({
+        status: 'offline',
+        detail: error instanceof Error ? error.message : 'DeerFlow Offline',
+      })
+    } finally {
       setIsResponding(false)
-    }, 650)
+    }
   }
 
   const handleComposerKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -166,8 +235,8 @@ function App() {
                 <PanelLeft size={16} />
               </div>
               <div>
-                <div className="topbar-title">最小聊天链路验证</div>
-                <div className="topbar-subtitle">本地桌面端会话、目录选择与模拟回复</div>
+                <div className="topbar-title">DeerFlow 直连验证</div>
+                <div className="topbar-subtitle">真实对话请求、thread 保持与本地目录上下文提示</div>
               </div>
             </div>
 
@@ -176,9 +245,9 @@ function App() {
                 <FolderOpen size={16} />
                 <span>选择目录</span>
               </button>
-              <div className="agent-badge">
+              <div className={`agent-badge ${backendState.status}`}>
                 <Bot size={16} />
-                <span>{isResponding ? 'Responding' : 'Ready'}</span>
+                <span>{isResponding ? 'Responding' : backendState.detail}</span>
               </div>
             </div>
           </header>
@@ -211,7 +280,7 @@ function App() {
                 className="composer-input"
                 onChange={(event) => setDraft(event.target.value)}
                 onKeyDown={handleComposerKeyDown}
-                placeholder="输入消息，先完成最小聊天链路..."
+                placeholder="输入消息，发送到 DeerFlow..."
                 rows={4}
                 value={draft}
               />
