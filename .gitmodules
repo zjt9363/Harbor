@@ -1,0 +1,3 @@
+[submodule "services/deer-flow"]
+	path = services/deer-flow
+	url = https://github.com/zjt9363/deer-flow.git
