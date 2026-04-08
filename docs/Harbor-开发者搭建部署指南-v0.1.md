@@ -35,17 +35,6 @@ sudo apt update
 sudo apt install -y git make curl ca-certificates
 ```
 
-验证 Docker 已注入到 Ubuntu：
-
-```bash
-docker version
-docker info
-```
-
-> 默认容器化路线下，不要求你先在 Ubuntu 安装 `uv`、`pnpm`、`nginx`、`python`、`node`。
-
-## 2. WSL 与 Docker Desktop 绑定（必须）
-
 在 Docker Desktop 中执行：
 
 1. 打开 `Settings -> Resources -> WSL Integration`
@@ -60,6 +49,15 @@ wsl --shutdown
 ```
 
 然后重新打开 Ubuntu 再执行 `docker version`。
+
+验证 Docker 已注入到 Ubuntu：
+
+```bash
+docker version
+docker info
+```
+
+> 默认容器化路线下，不要求你先在 Ubuntu 安装 `uv`、`pnpm`、`nginx`、`python`、`node`。
 
 ## 3. 拉代码与 submodule
 
