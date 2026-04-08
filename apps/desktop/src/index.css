@@ -37,9 +37,7 @@ button {
   cursor: pointer;
 }
 
-.app-shell {
-  display: grid;
-  grid-template-columns: 280px minmax(0, 1fr);
+.app-frame {
   min-height: 100vh;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.012), rgba(255, 255, 255, 0)),
@@ -178,6 +176,43 @@ button {
   min-width: 0;
   flex-direction: column;
   padding: 0;
+}
+
+.app-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  min-height: 3.3rem;
+  padding: 0 8.5rem 0 0.7rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(18, 21, 25, 0.96);
+}
+
+.app-shell {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  min-height: calc(100vh - 3.3rem);
+}
+
+.menu-bar-item {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 1.9rem;
+  padding: 0 0.7rem;
+  border: 0;
+  border-radius: 0.45rem;
+  background: transparent;
+  color: #d7dce8;
+  font-size: 0.82rem;
+  -webkit-app-region: no-drag;
+  transition:
+    background-color 140ms ease,
+    transform 140ms ease;
+}
+
+.menu-bar-item:hover {
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .topbar,
@@ -389,6 +424,11 @@ button {
 @media (max-width: 720px) {
   .main-panel {
     padding: 0;
+  }
+
+  .app-toolbar {
+    flex-wrap: wrap;
+    padding: 0.6rem 1rem;
   }
 
   .topbar,
