@@ -2,8 +2,8 @@
   font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
   color: #f4f6fb;
   background:
-    radial-gradient(circle at top, rgba(246, 127, 71, 0.08), transparent 25%),
-    linear-gradient(180deg, #111315 0%, #0a0b0d 100%);
+    radial-gradient(circle at top, rgba(235, 123, 71, 0.05), transparent 26%),
+    linear-gradient(180deg, #0f1114 0%, #0b0d10 100%);
   color-scheme: dark;
   font-synthesis: none;
   font-weight: 400;
@@ -42,17 +42,17 @@ button {
   grid-template-columns: 280px minmax(0, 1fr);
   min-height: 100vh;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.015), rgba(255, 255, 255, 0)),
-    linear-gradient(180deg, rgba(7, 8, 10, 0.85), rgba(7, 8, 10, 0.94));
+    linear-gradient(180deg, rgba(255, 255, 255, 0.012), rgba(255, 255, 255, 0)),
+    linear-gradient(180deg, rgba(9, 10, 12, 0.88), rgba(7, 8, 10, 0.96));
 }
 
 .sidebar {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  padding: 1rem;
+  padding: 1rem 0.9rem;
   border-right: 1px solid rgba(255, 255, 255, 0.06);
-  background: rgba(15, 16, 20, 0.92);
+  background: rgba(15, 17, 21, 0.92);
 }
 
 .sidebar-top {
@@ -64,19 +64,19 @@ button {
 .brand-panel {
   display: flex;
   align-items: center;
-  gap: 0.85rem;
-  padding: 0.2rem 0.1rem;
+  gap: 0.65rem;
+  padding: 0.15rem 0.1rem;
 }
 
 .brand-mark {
   display: grid;
-  width: 2rem;
-  height: 2rem;
+  width: 1.85rem;
+  height: 1.85rem;
   place-items: center;
-  border-radius: 0.7rem;
-  background: linear-gradient(135deg, #f67f47, #ffb571);
+  border-radius: 0.65rem;
+  background: linear-gradient(135deg, #ff9f58, #ffcc84);
   color: #141414;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 800;
 }
 
@@ -92,7 +92,7 @@ button {
 .workspace-label,
 .composer-hint,
 .message-role {
-  color: #9099aa;
+  color: #8c95a6;
 }
 
 .brand-subtitle,
@@ -114,6 +114,7 @@ button {
     border-color 140ms ease,
     transform 140ms ease,
     opacity 140ms ease;
+  -webkit-app-region: no-drag;
 }
 
 .primary-button:hover,
@@ -123,10 +124,10 @@ button {
 }
 
 .primary-button {
-  min-height: 2.8rem;
+  min-height: 2.55rem;
   padding: 0 0.95rem;
-  background: linear-gradient(135deg, #f67f47, #ffb571);
-  color: #121212;
+  background: linear-gradient(135deg, #ff9f58, #f3c176);
+  color: #111214;
   font-weight: 700;
 }
 
@@ -152,15 +153,16 @@ button {
   width: 100%;
   padding: 0.85rem 0.95rem;
   border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 1rem;
-  background: rgba(255, 255, 255, 0.025);
+  border-radius: 0.9rem;
+  background: rgba(255, 255, 255, 0.018);
   color: inherit;
   text-align: left;
+  -webkit-app-region: no-drag;
 }
 
 .conversation-item.active {
-  border-color: rgba(246, 127, 71, 0.22);
-  background: linear-gradient(180deg, rgba(246, 127, 71, 0.12), rgba(255, 255, 255, 0.03));
+  border-color: rgba(255, 181, 120, 0.18);
+  background: linear-gradient(180deg, rgba(255, 200, 150, 0.08), rgba(255, 255, 255, 0.025));
 }
 
 .conversation-title {
@@ -175,7 +177,7 @@ button {
   display: flex;
   min-width: 0;
   flex-direction: column;
-  padding: 1.1rem 1.4rem 1.4rem;
+  padding: 0;
 }
 
 .topbar,
@@ -183,9 +185,6 @@ button {
 .composer-shell {
   border: 1px solid rgba(255, 255, 255, 0.06);
   background: rgba(18, 20, 24, 0.82);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.03),
-    0 18px 40px rgba(0, 0, 0, 0.18);
 }
 
 .topbar {
@@ -193,8 +192,12 @@ button {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 1rem 1.1rem;
-  border-radius: 1.2rem;
+  padding: 0.9rem 1.2rem;
+  border: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 0;
+  background: rgba(16, 18, 22, 0.88);
+  -webkit-app-region: drag;
 }
 
 .topbar-title-group,
@@ -204,26 +207,30 @@ button {
   gap: 0.8rem;
 }
 
+.topbar-actions {
+  padding-right: 9rem;
+}
+
 .topbar-icon {
   display: grid;
-  width: 2rem;
-  height: 2rem;
+  width: 1.9rem;
+  height: 1.9rem;
   place-items: center;
-  border-radius: 0.8rem;
+  border-radius: 0.65rem;
   background: rgba(255, 255, 255, 0.04);
   color: #d8dce5;
 }
 
 .topbar-title {
-  font-size: 1rem;
-  font-weight: 700;
+  font-size: 0.95rem;
+  font-weight: 650;
 }
 
 .ghost-button {
-  min-height: 2.55rem;
-  padding: 0 0.9rem;
+  min-height: 2.35rem;
+  padding: 0 0.85rem;
   border-color: rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 255, 255, 0.025);
   color: #f0f3f9;
 }
 
@@ -231,12 +238,12 @@ button {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  min-height: 2.55rem;
+  min-height: 2.35rem;
   padding: 0 0.9rem;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 0.95rem;
-  background: rgba(116, 208, 156, 0.08);
-  color: #9ae5b2;
+  background: rgba(123, 214, 166, 0.08);
+  color: #9fe0b9;
   font-weight: 600;
 }
 
@@ -244,9 +251,10 @@ button {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  margin-top: 0.9rem;
-  padding: 0.9rem 1rem;
-  border-radius: 1rem;
+  margin: 1rem 1.2rem 0;
+  padding: 0.8rem 0.9rem;
+  border-radius: 0.9rem;
+  background: rgba(255, 255, 255, 0.024);
 }
 
 .workspace-path {
@@ -267,7 +275,7 @@ button {
   max-width: 980px;
   margin: 0 auto;
   overflow: auto;
-  padding: 2rem 0 1.2rem;
+  padding: 1.7rem 0 1.2rem;
 }
 
 .message-row {
@@ -294,17 +302,17 @@ button {
   padding: 0.95rem 1rem;
   border: 1px solid rgba(255, 255, 255, 0.07);
   border-radius: 1.1rem;
-  background: rgba(255, 255, 255, 0.035);
+  background: rgba(255, 255, 255, 0.03);
   color: #f4f6fb;
   white-space: pre-wrap;
 }
 
 .message-row.user .message-content {
-  background: linear-gradient(180deg, rgba(67, 74, 89, 0.35), rgba(255, 255, 255, 0.04));
+  background: linear-gradient(180deg, rgba(60, 66, 80, 0.34), rgba(255, 255, 255, 0.03));
 }
 
 .message-row.assistant .message-content {
-  background: rgba(255, 255, 255, 0.025);
+  background: rgba(255, 255, 255, 0.022);
 }
 
 .composer-shell {
@@ -314,7 +322,11 @@ button {
   max-width: 980px;
   margin: 0 auto;
   padding: 0.95rem;
-  border-radius: 1.25rem;
+  border-radius: 1.1rem;
+  background: rgba(17, 19, 23, 0.92);
+  box-shadow:
+    0 18px 38px rgba(0, 0, 0, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
 
 .composer-hint {
@@ -334,8 +346,9 @@ button {
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 1rem;
   outline: none;
-  background: rgba(9, 10, 12, 0.86);
+  background: rgba(10, 12, 14, 0.96);
   color: #f4f6fb;
+  -webkit-app-region: no-drag;
 }
 
 .composer-input::placeholder {
@@ -343,8 +356,8 @@ button {
 }
 
 .composer-input:focus {
-  border-color: rgba(246, 127, 71, 0.34);
-  box-shadow: 0 0 0 4px rgba(246, 127, 71, 0.08);
+  border-color: rgba(255, 184, 120, 0.28);
+  box-shadow: 0 0 0 4px rgba(255, 184, 120, 0.06);
 }
 
 .send-button {
@@ -352,8 +365,8 @@ button {
   min-width: 7rem;
   min-height: 3.15rem;
   padding: 0 1rem;
-  background: linear-gradient(135deg, #f67f47, #ffb571);
-  color: #121212;
+  background: linear-gradient(135deg, #ff9f58, #f3c176);
+  color: #111214;
   font-weight: 700;
 }
 
@@ -375,7 +388,7 @@ button {
 
 @media (max-width: 720px) {
   .main-panel {
-    padding: 1rem;
+    padding: 0;
   }
 
   .topbar,
@@ -386,6 +399,15 @@ button {
   .topbar-actions,
   .composer {
     width: 100%;
+  }
+
+  .topbar-actions {
+    padding-right: 0;
+  }
+
+  .workspace-strip {
+    margin-left: 1rem;
+    margin-right: 1rem;
   }
 
   .composer {

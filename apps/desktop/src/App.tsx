@@ -1,5 +1,11 @@
 import { type KeyboardEvent, useEffect, useRef, useState } from 'react'
-import { Bot, FolderOpen, MessageSquarePlus, PanelLeft, SendHorizontal } from 'lucide-react'
+import {
+  Bot,
+  FolderOpen,
+  MessageSquarePlus,
+  PanelLeft,
+  SendHorizontal,
+} from 'lucide-react'
 import './index.css'
 
 type Message = {
@@ -123,7 +129,7 @@ function App() {
             <div className="brand-mark">S</div>
             <div>
               <div className="brand-title">SkillOps</div>
-              <div className="brand-subtitle">Desktop Client</div>
+              <div className="brand-subtitle">本地 Agent 工作台</div>
             </div>
           </div>
 
@@ -151,8 +157,8 @@ function App() {
               <PanelLeft size={16} />
             </div>
             <div>
-              <div className="topbar-title">SkillOps</div>
-              <div className="topbar-subtitle">最小聊天链路验证</div>
+              <div className="topbar-title">最小聊天链路验证</div>
+              <div className="topbar-subtitle">本地桌面端会话、目录选择与模拟回复</div>
             </div>
           </div>
 

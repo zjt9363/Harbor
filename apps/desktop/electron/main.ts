@@ -1,4 +1,4 @@
-import { app, BrowserWindow, dialog, ipcMain } from 'electron'
+import { app, BrowserWindow, dialog, ipcMain, Menu } from 'electron'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -13,7 +13,13 @@ function createWindow() {
     minWidth: 1200,
     minHeight: 760,
     backgroundColor: '#101319',
-    autoHideMenuBar: false,
+    autoHideMenuBar: true,
+    titleBarStyle: 'hidden',
+    titleBarOverlay: {
+      color: '#111317',
+      symbolColor: '#f3f5f9',
+      height: 44,
+    },
     webPreferences: {
       preload: join(__dirname, 'preload.js'),
       contextIsolation: true,
@@ -41,6 +47,7 @@ ipcMain.handle('workspace:select', async () => {
 })
 
 app.whenReady().then(() => {
+  Menu.setApplicationMenu(null)
   createWindow()
 
   app.on('activate', () => {
