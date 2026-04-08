@@ -264,17 +264,16 @@ Harbor 桌面客户端 -> DeerFlow -> vLLM -> google/gemma-4-E4B-it
 
 因此，当前做法是：
 
-- 把模型官方仓库作为 submodule 引入
-- 模型权重后续部署时再单独拉取
-
-这次仓库内引入的是 Hugging Face 上的官方模型仓库，用于保留模型卡、权重引用和部署上下文；实际大权重文件不会跟着 Harbor 仓库一起提交。
+- 仓库内只保留模型部署脚本、配置模板和说明文档
+- 模型权重与缓存由 Hugging Face + vLLM 在部署时拉取
+- 不再把模型仓库作为 Git submodule 保留在 Harbor 仓库中
 
 ## 8. 当前仓库建议结构
 
 模型相关代码建议放在：
 
 ```text
-services/models/
+scripts/
 ```
 
 例如：
@@ -282,8 +281,8 @@ services/models/
 ```text
 services/
   deer-flow/
-  models/
-    gemma-4-e4b-it/
+scripts/
+  start-vllm.sh
 ```
 
 ## 9. 参考来源
