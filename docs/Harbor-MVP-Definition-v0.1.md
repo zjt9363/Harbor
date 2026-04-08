@@ -1,8 +1,8 @@
-# SkillOps MVP 定义 v0.1
+# Harbor MVP 定义 v0.1
 
 ## 1. 项目目标
 
-SkillOps 是一个面向团队内部使用的本地化 Agent 平台。第一阶段目标是搭建一个桌面客户端，让团队成员能够通过统一聊天界面与本地部署的开源 Agent 交互，并逐步接入本地工作目录、历史会话和附件能力。
+Harbor 是一个面向团队内部使用的本地化 Agent 平台。第一阶段目标是搭建一个桌面客户端，让团队成员能够通过统一聊天界面与本地部署的开源 Agent 交互，并逐步接入本地工作目录、历史会话和附件能力。
 
 ## 2. 目标用户
 
@@ -60,7 +60,7 @@ MVP 阶段默认用户规模较小，以内部试用和验证为主。
 
 第一版主链路定义为：
 
-1. 用户打开 SkillOps 桌面客户端
+1. 用户打开 Harbor 桌面客户端
 2. 用户输入文本，或上传文件/图片
 3. 客户端将请求发送到 API Server
 4. API Server 调用 Agent Runtime
@@ -75,7 +75,7 @@ MVP 阶段默认用户规模较小，以内部试用和验证为主。
 
 MVP 阶段采用基础分层架构：
 
-- SkillOps Desktop Client（Electron + React）
+- Harbor Desktop Client（Electron + React）
 - API Server
 - OpenClaw Gateway / Agent Runtime
 - Local Model Server（如 vLLM 或 Ollama）
@@ -124,4 +124,4 @@ MVP 阶段采用基础分层架构：
 
 ## 11. 一句话版本
 
-SkillOps MVP 的目标不是一开始做成完整的智能工程平台，而是先做出一个团队可使用、可聊天、可上传文件、可接本地 Agent 的基础桌面客户端。
+Harbor MVP 的目标不是一开始做成完整的智能工程平台，而是先做出一个团队可使用、可聊天、可上传文件、可接本地 Agent 的基础桌面客户端。

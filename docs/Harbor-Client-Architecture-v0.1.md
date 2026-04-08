@@ -1,8 +1,8 @@
-# SkillOps 客户端架构设计 v0.1
+# Harbor 客户端架构设计 v0.1
 
 ## 1. 文档目标
 
-本文档用于定义 SkillOps 第一阶段桌面客户端的职责、内部模块划分、关键数据流和推荐技术栈。
+本文档用于定义 Harbor 第一阶段桌面客户端的职责、内部模块划分、关键数据流和推荐技术栈。
 
 当前版本以如下目标为前提：
 
@@ -13,7 +13,7 @@
 
 ## 2. 客户端目标
 
-SkillOps 客户端不是简单的聊天窗口，而是一个带“本地工作区入口”的桌面 Agent 客户端。
+Harbor 客户端不是简单的聊天窗口，而是一个带“本地工作区入口”的桌面 Agent 客户端。
 
 第一阶段客户端需要同时承担两类职责：
 
@@ -99,7 +99,7 @@ flowchart TD
     B --> E["Client State Layer"]
     B --> F["Transport Layer"]
     C --> G["Local Workspace Access"]
-    F --> H["SkillOps API Server"]
+    F --> H["Harbor API Server"]
 ```
 
 ## 6. 模块划分
@@ -328,4 +328,4 @@ UI Layer 负责具体界面呈现，建议拆成以下区域：
 
 ## 12. 一句话总结
 
-SkillOps 客户端第一阶段应采用一套“桌面壳 + React 渲染层 + 本地能力桥接层 + 聊天工作区 UI”的结构。技术上优先选择 Electron + React + TypeScript，以最快速度做出一个接近 Codex 桌面端气质、同时具备本地工作目录能力的客户端。
+Harbor 客户端第一阶段应采用一套“桌面壳 + React 渲染层 + 本地能力桥接层 + 聊天工作区 UI”的结构。技术上优先选择 Electron + React + TypeScript，以最快速度做出一个接近 Codex 桌面端气质、同时具备本地工作目录能力的客户端。

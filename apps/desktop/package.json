@@ -2,8 +2,8 @@
   "name": "desktop",
   "private": true,
   "version": "0.0.0",
-  "description": "SkillOps local-first Electron desktop client",
-  "author": "SkillOps Team",
+  "description": "Harbor local-first Electron desktop client",
+  "author": "Harbor Team",
   "main": "dist-electron/main.js",
   "type": "module",
   "scripts": {
@@ -18,8 +18,8 @@
     "preview": "vite preview"
   },
   "build": {
-    "appId": "com.skillops.desktop",
-    "productName": "SkillOps Desktop",
+    "appId": "com.harbor.desktop",
+    "productName": "Harbor",
     "directories": {
       "output": "../../release/desktop"
     },

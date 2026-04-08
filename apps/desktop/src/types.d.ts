@@ -2,7 +2,7 @@ export {}
 
 declare global {
   interface Window {
-    skillops: {
+    harbor: {
       selectWorkspace: () => Promise<string | null>
     }
   }

@@ -24,7 +24,7 @@ const initialMessages: Message[] = [
   {
     id: 'm-1',
     role: 'assistant',
-    content: 'SkillOps 客户端已经准备好。现在这是一条本地模拟聊天链路，你可以先直接发送消息。',
+    content: 'Harbor 客户端已经准备好。现在这是一条本地模拟聊天链路，你可以先直接发送消息。',
   },
   {
     id: 'm-2',
@@ -54,7 +54,7 @@ function App() {
   }, [messages, isResponding])
 
   const handleSelectWorkspace = async () => {
-    const selected = await window.skillops.selectWorkspace()
+    const selected = await window.harbor.selectWorkspace()
     if (!selected) {
       return
     }
@@ -135,9 +135,9 @@ function App() {
         <aside className="sidebar">
           <div className="sidebar-top">
             <div className="brand-panel">
-              <div className="brand-mark">S</div>
+              <div className="brand-mark">H</div>
               <div>
-                <div className="brand-title">SkillOps</div>
+                <div className="brand-title">Harbor</div>
                 <div className="brand-subtitle">本地 Agent 工作台</div>
               </div>
             </div>
@@ -191,13 +191,13 @@ function App() {
           <section aria-live="polite" className="message-stream">
             {messages.map((message) => (
               <article className={`message-row ${message.role}`} key={message.id}>
-                <div className="message-role">{message.role === 'assistant' ? 'SkillOps' : 'You'}</div>
+                <div className="message-role">{message.role === 'assistant' ? 'Harbor' : 'You'}</div>
                 <div className="message-content">{message.content}</div>
               </article>
             ))}
             {isResponding ? (
               <article className="message-row assistant pending">
-                <div className="message-role">SkillOps</div>
+                <div className="message-role">Harbor</div>
                 <div className="message-content">正在生成回复...</div>
               </article>
             ) : null}

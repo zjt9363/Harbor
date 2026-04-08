@@ -1,6 +1,6 @@
-# SkillOps
+# Harbor
 
-SkillOps is a local-first desktop agent platform for internal team use.
+Harbor is a local-first desktop agent platform for internal team use.
 
 The root npm workspace currently manages only the desktop app in `apps/desktop`.
 External service code under `services/` is not part of the root workspace.
@@ -31,6 +31,7 @@ docs/          Product, architecture, and roadmap documents
 apps/          User-facing applications
 services/      External or standalone backend services
 packages/      Shared packages
+scripts/       Local helper scripts such as packaging entrypoints
 infra/         Infrastructure config and scripts
 storage/       Local development storage
 ```

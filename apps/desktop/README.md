@@ -1,6 +1,6 @@
-# SkillOps Desktop
+# Harbor Desktop
 
-`apps/desktop` 是 SkillOps 的 Electron 桌面客户端工程。
+`apps/desktop` 是 Harbor 的 Electron 桌面客户端工程。
 
 这份文档按“完全不懂前端”的阅读方式来写，目标是帮助你回答三个问题：
 
@@ -111,7 +111,7 @@ Electron 项目通常要分三层来看：
 - Preload 暴露少量、受控的方法
 - React 页面只调用这些方法
 
-当前项目里，React 页面通过 `window.skillops.selectWorkspace()` 请求打开目录选择器，这个方法就是 Preload 暴露出来的。
+当前项目里，React 页面通过 `window.harbor.selectWorkspace()` 请求打开目录选择器，这个方法就是 Preload 暴露出来的。
 
 ### 3. Renderer
 
@@ -180,7 +180,7 @@ Electron 项目通常要分三层来看：
 这就是为什么前端可以写：
 
 ```ts
-window.skillops.selectWorkspace()
+window.harbor.selectWorkspace()
 ```
 
 而不是直接在 React 里调用 Electron 原生模块。
