@@ -58,6 +58,7 @@ storage/       本地开发期生成的数据与缓存
 
 如果你想看产品与架构文档，建议从 `docs/` 下这几份开始：
 
+- `Harbor-开发者搭建部署指南-v0.1.md`
 - `Harbor-技术选型-v0.1.md`
 - `Harbor-DeerFlow接入方案-v0.1.md`
 - `Harbor-系统架构设计-v0.1.md`
