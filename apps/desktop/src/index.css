@@ -72,8 +72,8 @@ button {
   height: 1.85rem;
   place-items: center;
   border-radius: 0.65rem;
-  background: linear-gradient(135deg, #ff9f58, #ffcc84);
-  color: #141414;
+  background: linear-gradient(135deg, #1f7bff, #58b7ff);
+  color: #ffffff;
   font-size: 0.9rem;
   font-weight: 800;
 }

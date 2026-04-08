@@ -5,6 +5,10 @@ import { fileURLToPath } from 'node:url'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 const isDev = !app.isPackaged
+const appId = 'com.harbor.desktop'
+const windowIcon = process.platform === 'win32'
+  ? join(__dirname, '../resources/icon.ico')
+  : join(__dirname, '../resources/icon.png')
 
 function createWindow() {
   const window = new BrowserWindow({
@@ -12,6 +16,7 @@ function createWindow() {
     height: 960,
     minWidth: 1200,
     minHeight: 760,
+    icon: windowIcon,
     backgroundColor: '#101319',
     autoHideMenuBar: true,
     titleBarStyle: 'hidden',
@@ -47,6 +52,7 @@ ipcMain.handle('workspace:select', async () => {
 })
 
 app.whenReady().then(() => {
+  app.setAppUserModelId(appId)
   Menu.setApplicationMenu(null)
   createWindow()
 

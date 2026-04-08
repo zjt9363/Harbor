@@ -32,6 +32,7 @@
 - 生成未封装目录：`npm run pack:desktop`
 - 生成 Windows 安装包：`npm run dist:desktop:win`
 - 生成 Windows 便携版：`npm run dist:desktop:portable`
+- 通过脚本入口打安装包：`npm run package:desktop`
 
 打包产物默认输出到：
 

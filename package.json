@@ -12,7 +12,7 @@
     "pack:desktop": "npm run pack --workspace apps/desktop",
     "dist:desktop:win": "npm run dist:win --workspace apps/desktop",
     "dist:desktop:portable": "npm run dist:portable --workspace apps/desktop",
-    "package:desktop": "powershell -ExecutionPolicy Bypass -File ./scripts/package-desktop.ps1"
+    "package:desktop": "scripts\\package-desktop.bat"
   },
   "engines": {
     "node": ">=22.0.0"
