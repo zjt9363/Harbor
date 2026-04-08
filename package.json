@@ -4,9 +4,7 @@
   "private": true,
   "description": "SkillOps monorepo",
   "workspaces": [
-    "apps/*",
-    "services/*",
-    "packages/*"
+    "apps/desktop"
   ],
   "scripts": {
     "dev:desktop": "npm run dev --workspace apps/desktop",
