@@ -1,62 +1,64 @@
 # Harbor
 
-Harbor is a local-first desktop agent platform for internal team use.
+Harbor 是一个面向团队内部使用的本地优先桌面 Agent 平台。
 
-The root npm workspace currently manages only the desktop app in `apps/desktop`.
-External service code under `services/` is not part of the root workspace.
+当前根目录 npm 工作区只管理 `apps/desktop` 这个桌面客户端工程。`services/` 下的代码不属于根工作区。
 
-## Current Implementation Snapshot
+## 当前实现状态
 
-The current runnable client is a desktop MVP under `apps/desktop` built with:
+当前可运行的客户端位于 `apps/desktop`，技术栈如下：
 
-- Electron: desktop shell, native window, system dialogs
-- React: renderer UI
-- TypeScript: application code for both renderer and Electron entrypoints
-- Vite: renderer dev server and production bundling
-- Plain CSS + `lucide-react`: current UI styling and icons
+- Electron：桌面应用外壳、原生窗口、系统对话框
+- React：渲染层界面
+- TypeScript：客户端与 Electron 入口代码
+- Vite：开发服务器与前端构建
+- CSS + `lucide-react`：当前界面样式与图标
 
-At the moment the desktop app supports:
+当前桌面端已经具备：
 
-- Local conversation shell
-- Real DeerFlow-backed message flow
-- Local workspace folder selection
-- A Codex-inspired dark desktop layout
+- 本地聊天界面
+- 真实 DeerFlow 消息收发链路
+- 本地工作目录选择
+- 配置中心
+- 本地日志落盘
+- 接近 Codex 风格的深色桌面布局
 
-It currently talks directly to DeerFlow and does not yet include a Harbor-owned auth / BFF layer.
+当前阶段桌面端直接连接 DeerFlow，尚未引入 Harbor 自己的登录鉴权层或业务后端代理层。
 
-## Repository Structure
+## 仓库结构
 
 ```text
-docs/          Product, architecture, and roadmap documents
-apps/          User-facing applications
-services/      External or standalone backend services
-packages/      Shared packages
-scripts/       Local helper scripts such as packaging entrypoints
-infra/         Infrastructure config and scripts
-storage/       Local development storage
+docs/          产品、架构、路线图与选型文档
+apps/          面向用户的应用
+services/      外部服务或独立后端代码
+packages/      共享包
+scripts/       本地辅助脚本，例如打包入口
+infra/         基础设施配置与脚本
+storage/       本地开发期生成的数据与缓存
 ```
 
-## Current Focus
+## 当前重点
 
-The current implementation focus is the desktop client MVP.
+当前项目重点已经从“桌面端骨架搭建”切换为：
 
-## Current MVP Direction
+- Harbor 直连 DeerFlow
+- 补真实聊天主链路
+- 后续再补文件上传、历史会话与连接状态
+- 最后再在 DeerFlow 前面加 Harbor 自己的鉴权层
 
-The first milestone is a desktop client based on Electron + React.
+## 推荐阅读顺序
 
-- Desktop-first chat experience
-- Local workspace selection on the user machine
-- Message send / receive flow
-- Later integration with API Server, Agent Runtime, and local model services
-
-The repository is currently prioritizing DeerFlow integration, then uploads / history recovery, and only after that a Harbor-owned auth layer.
-
-## Where To Start
-
-If you want to understand the current desktop implementation, read these files in order:
+如果你想快速理解当前实现，建议按下面顺序阅读：
 
 1. `apps/desktop/README.md`
 2. `apps/desktop/electron/main.ts`
-3. `apps/desktop/electron/preload.ts`
+3. `apps/desktop/electron/preload.cts`
 4. `apps/desktop/src/App.tsx`
 5. `apps/desktop/src/index.css`
+
+如果你想看产品与架构文档，建议从 `docs/` 下这几份开始：
+
+- `Harbor-技术选型-v0.1.md`
+- `Harbor-DeerFlow接入方案-v0.1.md`
+- `Harbor-系统架构设计-v0.1.md`
+- `Harbor-实现路线图-v0.1.md`

@@ -1,52 +1,54 @@
-# Harbor Desktop
+# Harbor 桌面客户端
 
 `apps/desktop` 是 Harbor 的 Electron 桌面客户端工程。
 
-这份文档按“完全不懂前端”的阅读方式来写，目标是帮助你回答三个问题：
+这份文档按“前端零基础也能读”的方式来写，重点回答三个问题：
 
-1. 这个项目现在能做什么
-2. 这个 Electron 项目由哪些文件组成
-3. 每一层代码各自负责什么
+1. 这个客户端现在能做什么
+2. 这个 Electron 项目由哪些部分组成
+3. 当前真实聊天链路是怎么打通的
 
 ## 当前能力
 
-当前这版是桌面端 MVP，已经具备：
+当前这版桌面端已经具备：
 
 - 桌面应用窗口
 - 本地聊天界面
 - DeerFlow 真实消息发送 / 接收
 - 本地目录选择
+- 配置中心
+- 本地日志系统
 - 深色工作台式布局
 
 当前这版已经直接接入 DeerFlow，但还没有 Harbor 自己的登录鉴权层。
 
 ## 配置方式
 
-当前桌面端不再依赖“改源码才能换后端地址”。
+当前桌面端已经不需要“改源码才能换后端地址”。
 
-现在的配置方式是：
+现在的配置入口有两种：
 
-- 应用内 `Settings` 配置中心
+- 应用内“设置”面板
 - 本地 JSON 配置文件
 
 当前已支持的配置项：
 
 - `backendBaseUrl`：DeerFlow 服务地址
 
-配置文件由 Electron 写到用户可写目录，适合打包后的安装版或便携版继续修改。应用里也提供了：
+配置文件由 Electron 写到用户可写目录，适合打包后的安装版和便携版继续修改。应用里也提供了：
 
-- 直接保存配置
+- 保存配置
 - 测试连接
 - 打开配置文件
 
-这意味着后续如果还要增加更多配置，例如：
+后续如果要继续增加更多配置，例如：
 
-- Harbor Auth / BFF 地址
+- Harbor 鉴权 / 业务后端代理层地址
 - 默认模型
 - 上传限制
 - 调试开关
 
-也可以继续沿着这套配置中心扩展，而不需要重新设计配置入口。
+也可以继续沿着这套配置中心扩展。
 
 ## 日志与排障
 
@@ -67,7 +69,7 @@
 - `release/desktop/win-unpacked/logs/main.log`
 - `release/desktop/win-unpacked/logs/renderer.log`
 
-当前已记录的关键阶段包括：
+当前已经记录的关键阶段包括：
 
 - 主进程启动
 - 窗口创建与页面加载
@@ -112,12 +114,12 @@
 - CSS
 - `lucide-react`
 
-这套栈可以这样理解：
+可以这样理解：
 
-- Electron 负责把网页 UI 装进桌面应用壳里
+- Electron 负责把网页界面装进桌面应用壳里
 - React 负责写界面和交互
 - TypeScript 是加了类型的 JavaScript
-- Vite 负责开发启动和打包
+- Vite 负责开发启动和前端构建
 - CSS 负责样式
 
 ## 项目结构
@@ -126,13 +128,16 @@
 apps/desktop/
   electron/
     main.ts          Electron 主进程入口
-    preload.ts       安全桥接层
+    preload.cts      安全桥接层
+    config.ts        桌面端配置读写
+    logger.ts        主进程日志
   src/
     App.tsx          主界面组件
     main.tsx         React 挂载入口
+    logger.ts        渲染层日志
     index.css        页面样式
     types.d.ts       浏览器全局类型声明
-  index.html         渲染页面的 HTML 壳
+  index.html         渲染页面的 HTML 外壳
   package.json       子项目脚本和依赖
   tsconfig*.json     TypeScript 配置
   vite.config.ts     Vite 配置
@@ -140,102 +145,96 @@ apps/desktop/
 
 ## 先理解 Electron 的三层结构
 
-Electron 项目通常要分三层来看：
+Electron 项目通常分三层：
 
-### 1. Main Process
+### 1. 主进程
 
 文件：`electron/main.ts`
 
-这是桌面应用的“主进程”。它更像应用管家，负责：
+这是桌面应用的“主控层”，负责：
 
 - 创建窗口
 - 控制窗口大小和标题栏
 - 打开系统目录选择框
 - 管理应用生命周期
+- 转发 DeerFlow 请求
+- 写主进程日志
 
-你可以把它理解成“桌面外壳层”，它不直接负责渲染聊天页面。
+### 2. 预加载层
 
-### 2. Preload
-
-文件：`electron/preload.ts`
+文件：`electron/preload.cts`
 
 这是“安全桥接层”。
 
-原因是：React 页面运行在浏览器环境里，默认不应该直接拥有 Node.js 的全部能力。否则页面脚本就可以直接读文件、调系统 API，风险太大。
-
-所以 Electron 推荐这样做：
+原因是 React 页面运行在浏览器环境里，不应该直接拥有 Node.js 的全部能力。所以当前项目采用：
 
 - 主进程掌握原生能力
-- Preload 暴露少量、受控的方法
+- 预加载层暴露少量受控方法
 - React 页面只调用这些方法
 
-当前项目里，React 页面通过 `window.harbor.selectWorkspace()` 请求打开目录选择器，这个方法就是 Preload 暴露出来的。
+例如：
 
-### 3. Renderer
+- `window.harbor.selectWorkspace()`
+- `window.harbor.getConfig()`
+- `window.harbor.sendMessage()`
+
+### 3. 渲染层
 
 文件：`src/main.tsx`、`src/App.tsx`
 
-这部分就是你真正看到的 UI 页面，本质上是一套 React 前端。
-
-它负责：
+这部分就是你看到的界面，本质上是一套 React 前端。它负责：
 
 - 左侧栏
 - 聊天消息区
 - 输入框
-- “选择目录”按钮
-- 本地状态变化
+- 设置面板
+- 当前工作目录展示
+- 页面状态更新
 
-所以 Electron 项目不是“只有桌面代码”，而是：
+## 启动链路
 
-- 外面一层桌面壳
-- 里面一层正常前端页面
+运行 `npm run dev:desktop` 后，大致会发生这些事：
 
-## 这个项目的启动链路
-
-你运行 `npm run dev:desktop` 后，大致会发生这些事：
-
-1. 根目录脚本转到 `apps/desktop`
+1. 根目录脚本切到 `apps/desktop`
 2. Vite 启动前端开发服务器
 3. Electron 启动桌面窗口
 4. Electron 窗口加载 Vite 提供的页面
-5. React 在 `#root` 节点上渲染整个聊天界面
+5. React 在 `#root` 节点上渲染整个客户端
 
-如果你想按文件顺序理解，可以按这个顺序看：
+如果想按代码顺序理解，建议按下面顺序看：
 
 1. `apps/desktop/package.json`
 2. `apps/desktop/electron/main.ts`
-3. `apps/desktop/electron/preload.ts`
+3. `apps/desktop/electron/preload.cts`
 4. `apps/desktop/src/main.tsx`
 5. `apps/desktop/src/App.tsx`
 6. `apps/desktop/src/index.css`
 
-## 每个核心文件是干什么的
+## 每个核心文件是做什么的
 
 ### `package.json`
 
 这里定义：
 
 - 项目依赖
-- `dev` / `build` / `lint` 等脚本
+- `dev` / `build` / `pack` / `dist` 等脚本
 
-你可以把它看成这个子项目的“运行说明书”。
+可以把它看成这个子项目的“运行说明书”。
 
 ### `electron/main.ts`
 
-这里负责创建 `BrowserWindow`。
+这里负责创建 `BrowserWindow`，也负责：
 
-`BrowserWindow` 可以理解为：
+- 调配置读写模块
+- 调 DeerFlow HTTP 接口
+- 接收渲染层的 IPC 请求
+- 写主进程日志
 
-- 一个桌面窗口
-- 里面装着一个网页渲染环境
+### `electron/preload.cts`
 
-它还注册了目录选择相关的 IPC 处理逻辑。
+这里通过 `contextBridge.exposeInMainWorld(...)` 把安全 API 挂到页面上。
 
-### `electron/preload.ts`
-
-这里用 `contextBridge.exposeInMainWorld(...)` 把安全 API 挂到页面上。
-
-这就是为什么前端可以写：
+这也是为什么前端可以写：
 
 ```ts
 window.harbor.selectWorkspace()
@@ -249,8 +248,7 @@ window.harbor.selectWorkspace()
 
 - 找到 HTML 里的 `#root`
 - 把 `<App />` 挂进去
-
-前端很多项目都会有这样一个很薄的入口文件。
+- 注册渲染层全局错误日志
 
 ### `src/App.tsx`
 
@@ -258,71 +256,68 @@ window.harbor.selectWorkspace()
 
 里面包含：
 
-- 初始消息数据
-- 当前会话数据
+- 当前会话状态
 - 输入框状态
-- 点击发送后的模拟回复逻辑
-- 选择目录后的状态更新
+- 设置面板状态
+- DeerFlow 状态展示
+- 点击发送后的真实请求逻辑
 - 整个界面 JSX 结构
-
-如果你把它类比成后端世界，可以把它理解成“当前页面的主控制器 + 模板”。
 
 ### `src/index.css`
 
-这是界面样式文件。
-
-它控制：
+这是界面样式文件，负责：
 
 - 布局
 - 颜色
 - 圆角
 - 间距
 - 消息卡片样式
-- 输入框样式
+- 设置面板样式
 
-前端里“功能”和“样式”通常会分开写：
+### `electron/config.ts`
 
-- 功能逻辑在 `.ts` / `.tsx`
-- 样式在 `.css`
+这是桌面端配置模块，负责：
+
+- 读取本地配置文件
+- 写入本地配置文件
+- 提供默认配置
+
+### `electron/logger.ts` 与 `src/logger.ts`
+
+这是日志模块，负责：
+
+- 主进程日志落盘
+- 渲染层日志落盘
+- 启动阶段与异常阶段的关键日志记录
 
 ## 什么是 `.tsx`
 
 你会看到 `App.tsx` 不是 `.ts`，而是 `.tsx`。
 
-这是因为它里面写了 JSX。
-
-JSX 是一种“在 JavaScript / TypeScript 里直接写界面结构”的语法，比如：
+这是因为它里面写了 JSX，也就是“在 TypeScript 里直接写界面结构”的语法，例如：
 
 ```tsx
 <button>发送</button>
 ```
-
-它最后会被编译成正常的 JavaScript。
 
 所以可以这样记：
 
 - `.ts`：普通 TypeScript 逻辑文件
 - `.tsx`：包含 React 组件界面的 TypeScript 文件
 
-## 什么是 React State
+## 什么是 React 状态
 
-在 `App.tsx` 里你会看到 `useState(...)`。
+在 `App.tsx` 里会看到 `useState(...)`。
 
-这表示“组件状态”。
+这表示“组件状态”，例如：
 
-例如：
-
-- 输入框里当前输入的内容
+- 输入框当前内容
 - 当前消息列表
+- 当前会话
 - 当前是否正在回复
+- 当前设置面板是否打开
 
 这些值一变化，React 会自动重新渲染页面。
-
-这也是为什么前端代码看起来像：
-
-- 先定义状态
-- 再定义点击事件
-- 最后返回页面结构
 
 ## 什么是 `useEffect`
 
@@ -330,13 +325,12 @@ JSX 是一种“在 JavaScript / TypeScript 里直接写界面结构”的语法
 
 - 当某些状态变化后，额外执行一段副作用逻辑
 
-当前项目里它用来做：
+当前项目里它主要用于：
 
 - 消息更新后自动滚动到底部
+- 首次进入页面时初始化配置和后端状态
 
-这类“不是直接渲染，而是伴随状态变化发生的动作”通常就会写在 `useEffect` 里。
-
-## 这条聊天链路是怎么跑通的
+## 当前消息链路是怎么跑通的
 
 当前消息发送流程是：
 
@@ -351,39 +345,32 @@ JSX 是一种“在 JavaScript / TypeScript 里直接写界面结构”的语法
 
 这就是当前 MVP 的“真实后端消息闭环”。
 
-## 为什么现在先直连 DeerFlow
+## 为什么当前先直连 DeerFlow
 
 当前版本采用的是：
 
-- Harbor Desktop 先直接连 DeerFlow
+- Harbor 桌面客户端先直接连接 DeerFlow
 - 后续再在前面补 Harbor 自己的鉴权和业务后端
 
 这样做的好处是：
 
 - 可以先验证真实 Agent 链路
 - 不会被账号体系阻塞主链路联调
-- 后面补 Harbor Auth / BFF 时，桌面端调用方式可以基本不变
+- 后面补 Harbor 鉴权 / 业务后端代理层时，桌面端调用方式基本不用大改
 
-## 你接下来最值得重点看的文件
+## 建议的阅读顺序
 
 如果你是前端新手，建议按下面顺序熟悉：
 
 1. `apps/desktop/src/App.tsx`
 2. `apps/desktop/src/index.css`
-3. `apps/desktop/electron/preload.ts`
+3. `apps/desktop/electron/preload.cts`
 4. `apps/desktop/electron/main.ts`
-
-这个顺序的好处是：
-
-- 先看你能直接看到的界面
-- 再看样式
-- 再看页面和系统能力怎么通信
-- 最后再看桌面壳本身
 
 ## 一句话总结
 
-这个项目本质上是“Electron 外壳 + React 页面 + Preload 安全桥接”的桌面应用。
+这个项目本质上是“Electron 外壳 + React 页面 + 预加载安全桥接”的桌面应用。
 
-如果你只先记住一句话，那就是：
+如果只记一句话，那就是：
 
-“`main.ts` 管桌面窗口，`preload.ts` 管安全桥接，`App.tsx` 管页面界面和交互。”
+“`main.ts` 管桌面窗口和本地能力，`preload.cts` 管安全桥接，`App.tsx` 管页面界面和交互。”
