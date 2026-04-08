@@ -2,6 +2,8 @@
   "name": "desktop",
   "private": true,
   "version": "0.0.0",
+  "description": "SkillOps local-first Electron desktop client",
+  "author": "SkillOps Team",
   "main": "dist-electron/main.js",
   "type": "module",
   "scripts": {
@@ -9,8 +11,36 @@
     "dev:renderer": "vite --host 127.0.0.1 --port 5173 --strictPort",
     "dev:electron": "wait-on tcp:5173 && electron .",
     "build": "tsc -b && tsc -p tsconfig.electron.json && vite build",
+    "pack": "npm run build && electron-builder --dir",
+    "dist:win": "npm run build && electron-builder --win nsis",
+    "dist:portable": "npm run build && electron-builder --win portable",
     "lint": "eslint .",
     "preview": "vite preview"
+  },
+  "build": {
+    "appId": "com.skillops.desktop",
+    "productName": "SkillOps Desktop",
+    "directories": {
+      "output": "../../release/desktop"
+    },
+    "files": [
+      "dist/**/*",
+      "dist-electron/**/*",
+      "package.json"
+    ],
+    "asar": true,
+    "win": {
+      "artifactName": "${productName}-${version}-${arch}.${ext}",
+      "signAndEditExecutable": false
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "artifactName": "${productName}-Setup-${version}-${arch}.${ext}"
+    },
+    "portable": {
+      "artifactName": "${productName}-Portable-${version}-${arch}.${ext}"
+    }
   },
   "dependencies": {
     "lucide-react": "^0.548.0",
@@ -22,9 +52,10 @@
     "@types/node": "^24.12.2",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "concurrently": "^9.2.1",
-    "electron": "^38.7.2",
     "@vitejs/plugin-react": "^6.0.1",
+    "concurrently": "^9.2.1",
+    "electron": "38.7.2",
+    "electron-builder": "^26.8.1",
     "eslint": "^9.39.4",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.5.2",

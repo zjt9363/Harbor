@@ -20,6 +20,29 @@
 
 当前这版还没有接入真实后端，所以聊天回复仍然是前端里的模拟数据。
 
+## 运行与打包
+
+开发时常用命令：
+
+- 根目录运行：`npm run dev:desktop`
+- 仅构建桌面端：`npm run build:desktop`
+
+打包时常用命令：
+
+- 生成未封装目录：`npm run pack:desktop`
+- 生成 Windows 安装包：`npm run dist:desktop:win`
+- 生成 Windows 便携版：`npm run dist:desktop:portable`
+
+打包产物默认输出到：
+
+- `release/desktop/`
+
+其中：
+
+- `pack:desktop` 适合本地检查打包结构
+- `dist:desktop:win` 会生成 NSIS 安装包
+- `dist:desktop:portable` 会生成免安装的便携版 `.exe`
+
 ## 技术栈
 
 当前实际使用的是：
