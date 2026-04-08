@@ -211,6 +211,10 @@ button {
     transform 140ms ease;
 }
 
+.menu-bar-item.with-icon {
+  gap: 0.4rem;
+}
+
 .menu-bar-item:hover {
   background: rgba(255, 255, 255, 0.05);
 }
@@ -420,6 +424,123 @@ button {
   opacity: 0.45;
 }
 
+.settings-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: grid;
+  place-items: center;
+  background: rgba(3, 5, 8, 0.62);
+  backdrop-filter: blur(10px);
+}
+
+.settings-dialog {
+  width: min(640px, calc(100vw - 2rem));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1.2rem;
+  background: linear-gradient(180deg, rgba(18, 20, 24, 0.98), rgba(14, 16, 19, 0.98));
+  box-shadow: 0 28px 68px rgba(0, 0, 0, 0.34);
+}
+
+.settings-header,
+.settings-body,
+.settings-actions {
+  padding-left: 1.2rem;
+  padding-right: 1.2rem;
+}
+
+.settings-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-top: 1.15rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.settings-title {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.settings-subtitle {
+  margin-top: 0.3rem;
+  color: #8c95a6;
+  font-size: 0.84rem;
+}
+
+.settings-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
+.settings-field,
+.settings-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.settings-label {
+  color: #9ca5b6;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.settings-input,
+.settings-path {
+  width: 100%;
+  min-width: 0;
+  padding: 0.82rem 0.9rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.9rem;
+  background: rgba(9, 11, 14, 0.96);
+  color: #edf2ff;
+}
+
+.settings-input {
+  outline: none;
+}
+
+.settings-input:focus {
+  border-color: rgba(88, 183, 255, 0.38);
+  box-shadow: 0 0 0 4px rgba(88, 183, 255, 0.08);
+}
+
+.settings-path {
+  overflow: auto;
+  font-family: "Cascadia Mono", "Consolas", monospace;
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.settings-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.7rem;
+  padding-top: 0;
+  padding-bottom: 1.2rem;
+}
+
+.icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.7rem;
+  background: rgba(255, 255, 255, 0.02);
+  color: #dfe5f1;
+}
+
 @media (max-width: 960px) {
   .app-shell {
     grid-template-columns: 1fr;
@@ -458,6 +579,11 @@ button {
   .workspace-strip {
     margin-left: 1rem;
     margin-right: 1rem;
+  }
+
+  .settings-actions {
+    flex-direction: column;
+    align-items: stretch;
   }
 
   .composer {

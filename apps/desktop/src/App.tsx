@@ -1,12 +1,17 @@
 import { type KeyboardEvent, useEffect, useRef, useState } from 'react'
 import {
   Bot,
+  Check,
+  Cog,
   FolderOpen,
   MessageSquarePlus,
+  PencilLine,
   PanelLeft,
   SendHorizontal,
+  X,
 } from 'lucide-react'
 import './index.css'
+import { logRenderer } from './logger'
 
 type Message = {
   id: string
@@ -26,6 +31,10 @@ type BackendState = {
   detail: string
 }
 
+type DesktopConfig = {
+  backendBaseUrl: string
+}
+
 const introMessages: Message[] = [
   {
     id: 'm-1',
@@ -34,10 +43,14 @@ const introMessages: Message[] = [
   },
 ]
 
+function createThreadId() {
+  return `thread-${Date.now()}-${Math.random().toString(16).slice(2, 10)}`
+}
+
 function createConversation(title = '当前会话'): Conversation {
   return {
     id: `conv-${Date.now()}`,
-    threadId: crypto.randomUUID(),
+    threadId: createThreadId(),
     title,
     updatedAt: '刚刚',
   }
@@ -49,11 +62,34 @@ function App() {
   const [messages, setMessages] = useState<Message[]>(introMessages)
   const [conversations, setConversations] = useState<Conversation[]>([createConversation()])
   const [isResponding, setIsResponding] = useState(false)
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false)
+  const [configPath, setConfigPath] = useState('')
+  const [desktopConfig, setDesktopConfig] = useState<DesktopConfig>({
+    backendBaseUrl: 'http://127.0.0.1:2026',
+  })
+  const [configDraft, setConfigDraft] = useState('http://127.0.0.1:2026')
   const [backendState, setBackendState] = useState<BackendState>({
     status: 'checking',
     detail: 'Checking DeerFlow',
   })
   const messageEndRef = useRef<HTMLDivElement | null>(null)
+
+  const refreshBackendStatus = async () => {
+    logRenderer('INFO', 'backend', 'refreshing backend status')
+    const status = await window.harbor.getBackendStatus()
+
+    setBackendState(
+      status.ok
+        ? {
+            status: 'ready',
+            detail: `DeerFlow Ready · ${status.baseUrl}`,
+          }
+        : {
+            status: 'offline',
+            detail: status.error ?? 'DeerFlow Offline',
+          },
+    )
+  }
 
   useEffect(() => {
     messageEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -61,24 +97,47 @@ function App() {
 
   useEffect(() => {
     let cancelled = false
+    logRenderer('INFO', 'app', 'starting initial config and backend bootstrap')
 
-    window.harbor.getBackendStatus().then((status) => {
-      if (cancelled) {
-        return
-      }
+    Promise.all([window.harbor.getConfig(), window.harbor.getBackendStatus()])
+      .then(([configSnapshot, status]) => {
+        if (cancelled) {
+          return
+        }
 
-      setBackendState(
-        status.ok
-          ? {
-              status: 'ready',
-              detail: `DeerFlow Ready · ${status.baseUrl}`,
-            }
-          : {
-              status: 'offline',
-              detail: status.error ?? 'DeerFlow Offline',
-            },
-      )
-    })
+        logRenderer('INFO', 'app', 'initial bootstrap finished', {
+          backendBaseUrl: configSnapshot.config.backendBaseUrl,
+          configPath: configSnapshot.path,
+          backendOk: status.ok,
+        })
+        setDesktopConfig(configSnapshot.config)
+        setConfigDraft(configSnapshot.config.backendBaseUrl)
+        setConfigPath(configSnapshot.path)
+        setBackendState(
+          status.ok
+            ? {
+                status: 'ready',
+                detail: `DeerFlow Ready · ${status.baseUrl}`,
+              }
+            : {
+                status: 'offline',
+                detail: status.error ?? 'DeerFlow Offline',
+              },
+        )
+      })
+      .catch((error) => {
+        if (cancelled) {
+          return
+        }
+
+        logRenderer('ERROR', 'app', 'initial bootstrap failed', {
+          error: error instanceof Error ? error.message : String(error),
+        })
+        setBackendState({
+          status: 'offline',
+          detail: error instanceof Error ? error.message : '配置初始化失败',
+        })
+      })
 
     return () => {
       cancelled = true
@@ -86,24 +145,49 @@ function App() {
   }, [])
 
   const handleSelectWorkspace = async () => {
+    logRenderer('INFO', 'workspace', 'select workspace clicked')
     const selected = await window.harbor.selectWorkspace()
     if (!selected) {
+      logRenderer('INFO', 'workspace', 'select workspace cancelled')
       return
     }
 
+    logRenderer('INFO', 'workspace', 'workspace updated', { path: selected })
     setWorkspacePath(selected)
   }
 
   const handleNewConversation = () => {
+    logRenderer('INFO', 'conversation', 'new conversation created')
     setMessages(introMessages)
     setDraft('')
     setIsResponding(false)
     setConversations([createConversation('新会话')])
   }
 
+  const handleSaveConfig = async () => {
+    logRenderer('INFO', 'config', 'saving desktop config', { backendBaseUrl: configDraft })
+    const snapshot = await window.harbor.updateConfig({
+      backendBaseUrl: configDraft,
+    })
+
+    setDesktopConfig(snapshot.config)
+    setConfigDraft(snapshot.config.backendBaseUrl)
+    setConfigPath(snapshot.path)
+    setIsSettingsOpen(false)
+    logRenderer('INFO', 'config', 'desktop config saved', {
+      backendBaseUrl: snapshot.config.backendBaseUrl,
+      path: snapshot.path,
+    })
+    await refreshBackendStatus()
+  }
+
   const handleSend = async () => {
     const content = draft.trim()
     if (!content || isResponding) {
+      logRenderer('DEBUG', 'chat', 'send skipped', {
+        hasContent: Boolean(content),
+        isResponding,
+      })
       return
     }
 
@@ -138,6 +222,11 @@ function App() {
 
     try {
       const activeConversation = conversations[0]
+      logRenderer('INFO', 'chat', 'sending user message', {
+        threadId: activeConversation.threadId,
+        messageLength: content.length,
+        workspacePath,
+      })
       const response = await window.harbor.sendMessage({
         threadId: activeConversation.threadId,
         message: content,
@@ -164,9 +253,17 @@ function App() {
       )
       setBackendState({
         status: 'ready',
-        detail: 'DeerFlow Ready',
+        detail: `DeerFlow Ready · ${desktopConfig.backendBaseUrl}`,
+      })
+      logRenderer('INFO', 'chat', 'received assistant reply', {
+        threadId: activeConversation.threadId,
+        replyLength: response.reply.length,
+        title: response.title,
       })
     } catch (error) {
+      logRenderer('ERROR', 'chat', 'chat request failed', {
+        error: error instanceof Error ? error.message : String(error),
+      })
       const assistantMessage: Message = {
         id: `assistant-${Date.now()}`,
         role: 'assistant',
@@ -198,6 +295,10 @@ function App() {
         <button className="menu-bar-item" type="button">View</button>
         <button className="menu-bar-item" type="button">Window</button>
         <button className="menu-bar-item" type="button">Help</button>
+        <button className="menu-bar-item with-icon" onClick={() => setIsSettingsOpen(true)} type="button">
+          <Cog size={14} />
+          <span>Settings</span>
+        </button>
       </div>
 
       <div className="app-shell">
@@ -292,6 +393,59 @@ function App() {
           </footer>
         </main>
       </div>
+
+      {isSettingsOpen ? (
+        <div className="settings-overlay" role="presentation">
+          <section aria-label="Harbor settings" className="settings-dialog">
+            <div className="settings-header">
+              <div>
+                <div className="settings-title">Harbor 配置中心</div>
+                <div className="settings-subtitle">这里先管理 DeerFlow 地址，后面可以继续扩展更多配置项。</div>
+              </div>
+              <button className="icon-button" onClick={() => setIsSettingsOpen(false)} type="button">
+                <X size={16} />
+              </button>
+            </div>
+
+            <div className="settings-body">
+              <label className="settings-field">
+                <span className="settings-label">DeerFlow Base URL</span>
+                <input
+                  className="settings-input"
+                  onChange={(event) => setConfigDraft(event.target.value)}
+                  placeholder="http://127.0.0.1:2026"
+                  value={configDraft}
+                />
+              </label>
+
+              <div className="settings-meta">
+                <span className="settings-label">配置文件路径</span>
+                <code className="settings-path">{configPath || 'Loading...'}</code>
+              </div>
+
+              <div className="settings-meta">
+                <span className="settings-label">当前生效地址</span>
+                <code className="settings-path">{desktopConfig.backendBaseUrl}</code>
+              </div>
+            </div>
+
+            <div className="settings-actions">
+              <button className="ghost-button" onClick={() => window.harbor.openConfigFile()} type="button">
+                <PencilLine size={16} />
+                <span>打开配置文件</span>
+              </button>
+              <button className="ghost-button" onClick={() => refreshBackendStatus()} type="button">
+                <Check size={16} />
+                <span>测试连接</span>
+              </button>
+              <button className="primary-button" onClick={handleSaveConfig} type="button">
+                <Check size={16} />
+                <span>保存配置</span>
+              </button>
+            </div>
+          </section>
+        </div>
+      ) : null}
     </div>
   )
 }

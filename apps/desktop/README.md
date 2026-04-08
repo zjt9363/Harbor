@@ -20,6 +20,63 @@
 
 当前这版已经直接接入 DeerFlow，但还没有 Harbor 自己的登录鉴权层。
 
+## 配置方式
+
+当前桌面端不再依赖“改源码才能换后端地址”。
+
+现在的配置方式是：
+
+- 应用内 `Settings` 配置中心
+- 本地 JSON 配置文件
+
+当前已支持的配置项：
+
+- `backendBaseUrl`：DeerFlow 服务地址
+
+配置文件由 Electron 写到用户可写目录，适合打包后的安装版或便携版继续修改。应用里也提供了：
+
+- 直接保存配置
+- 测试连接
+- 打开配置文件
+
+这意味着后续如果还要增加更多配置，例如：
+
+- Harbor Auth / BFF 地址
+- 默认模型
+- 上传限制
+- 调试开关
+
+也可以继续沿着这套配置中心扩展，而不需要重新设计配置入口。
+
+## 日志与排障
+
+当前桌面端已经补了本地日志，方便定位黑屏、启动失败、配置读取失败和 DeerFlow 请求问题。
+
+开发时日志默认落到：
+
+- `storage/logs/desktop/main.log`
+- `storage/logs/desktop/renderer.log`
+
+打包后的 exe 运行时，日志优先落到可执行文件同级目录下：
+
+- `logs/main.log`
+- `logs/renderer.log`
+
+例如 `win-unpacked` 版本通常会落到：
+
+- `release/desktop/win-unpacked/logs/main.log`
+- `release/desktop/win-unpacked/logs/renderer.log`
+
+当前已记录的关键阶段包括：
+
+- 主进程启动
+- 窗口创建与页面加载
+- 配置文件读写
+- 前端初始化
+- 发送消息与 DeerFlow 请求
+- 前端未捕获异常
+- 渲染进程崩溃或加载失败
+
 ## 运行与打包
 
 开发时常用命令：
