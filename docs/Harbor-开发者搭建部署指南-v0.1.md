@@ -189,7 +189,7 @@ make config
 
 这个脚本会：
 
-- 启动 `ollama/ollama` 容器
+- 启动 `ollama/ollama` 容器 (**端口默认11434**)
 - 把模型缓存持久化保存到 WSL 本地目录
 - 自动拉取默认模型 `gemma4:e2b`
 - 如果容器已存在，则直接复用
@@ -237,7 +237,7 @@ models:
     api_key: $OLLAMA_API_KEY
     base_url: http://host.docker.internal:11434/v1
     request_timeout: 600.0
-    max_retries: 2
+    max_retries: 5
     max_tokens: 8192
 ```
 

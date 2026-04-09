@@ -9,6 +9,7 @@ Thumbs.db
 !.env.example
 coverage/
 *.log
+Temp/
 
 apps/desktop/dist/
 apps/desktop/dist-electron/
