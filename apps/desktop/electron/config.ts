@@ -1,6 +1,7 @@
 import { app } from 'electron'
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { writeMainLog } from './logger.js'
 
 export type HarborDesktopConfig = {
@@ -16,12 +17,46 @@ const defaultConfig: HarborDesktopConfig = {
   backendBaseUrl: process.env.HARBOR_DEERFLOW_BASE_URL ?? 'http://127.0.0.1:2026',
 }
 
-function getConfigPath() {
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
+
+function getProjectRoot() {
+  return join(__dirname, '../../..')
+}
+
+function getLegacyConfigPath() {
   return join(app.getPath('userData'), 'harbor.config.json')
+}
+
+function getConfigPath() {
+  if (app.isPackaged) {
+    return join(dirname(app.getPath('exe')), 'harbor.config.json')
+  }
+
+  return join(getProjectRoot(), '.harbor', 'desktop', 'harbor.config.json')
 }
 
 function ensureConfigDir(path: string) {
   mkdirSync(dirname(path), { recursive: true })
+}
+
+function ensureConfigAvailable(path: string) {
+  ensureConfigDir(path)
+
+  if (existsSync(path)) {
+    return
+  }
+
+  const legacyPath = getLegacyConfigPath()
+  if (!existsSync(legacyPath)) {
+    return
+  }
+
+  copyFileSync(legacyPath, path)
+  writeMainLog('INFO', 'config', 'migrated desktop config from legacy path', {
+    from: legacyPath,
+    to: path,
+  })
 }
 
 function normalizeConfig(input: Partial<HarborDesktopConfig> | null | undefined): HarborDesktopConfig {
@@ -36,7 +71,7 @@ function normalizeConfig(input: Partial<HarborDesktopConfig> | null | undefined)
 
 export function loadDesktopConfig(): HarborDesktopConfigSnapshot {
   const path = getConfigPath()
-  ensureConfigDir(path)
+  ensureConfigAvailable(path)
 
   try {
     const raw = readFileSync(path, 'utf-8')

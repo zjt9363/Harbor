@@ -6,6 +6,7 @@ release/
 Thumbs.db
 .env
 .env.*
+.harbor
 !.env.example
 coverage/
 *.log
