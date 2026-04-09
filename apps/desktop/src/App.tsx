@@ -35,6 +35,22 @@ type DesktopConfig = {
   backendBaseUrl: string
 }
 
+function getBackendBadgeLabel(status: BackendState['status'], isResponding: boolean) {
+  if (isResponding) {
+    return 'Responding'
+  }
+
+  if (status === 'ready') {
+    return 'DeerFlow Ready'
+  }
+
+  if (status === 'checking') {
+    return 'Connecting'
+  }
+
+  return 'Connection Error'
+}
+
 const introMessages: Message[] = [
   {
     id: 'm-1',
@@ -63,6 +79,7 @@ function App() {
   const [conversations, setConversations] = useState<Conversation[]>([createConversation()])
   const [isResponding, setIsResponding] = useState(false)
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
+  const [isStatusDetailOpen, setIsStatusDetailOpen] = useState(false)
   const [configPath, setConfigPath] = useState('')
   const [desktopConfig, setDesktopConfig] = useState<DesktopConfig>({
     backendBaseUrl: 'http://127.0.0.1:2026',
@@ -163,6 +180,8 @@ function App() {
     setIsResponding(false)
     setConversations([createConversation('新会话')])
   }
+
+  const backendBadgeLabel = getBackendBadgeLabel(backendState.status, isResponding)
 
   const handleSaveConfig = async () => {
     logRenderer('INFO', 'config', 'saving desktop config', { backendBaseUrl: configDraft })
@@ -346,9 +365,23 @@ function App() {
                 <FolderOpen size={16} />
                 <span>选择目录</span>
               </button>
-              <div className={`agent-badge ${backendState.status}`}>
-                <Bot size={16} />
-                <span>{isResponding ? 'Responding' : backendState.detail}</span>
+              <div className="status-panel">
+                <button
+                  aria-expanded={isStatusDetailOpen}
+                  className={`agent-badge ${backendState.status}`}
+                  onClick={() => setIsStatusDetailOpen((current) => !current)}
+                  title={backendState.detail}
+                  type="button"
+                >
+                  <Bot size={16} />
+                  <span className="agent-badge-label">{backendBadgeLabel}</span>
+                </button>
+                {isStatusDetailOpen ? (
+                  <div className="status-detail-card" role="dialog">
+                    <div className="status-detail-title">{backendBadgeLabel}</div>
+                    <div className="status-detail-text">{backendState.detail}</div>
+                  </div>
+                ) : null}
               </div>
             </div>
           </header>

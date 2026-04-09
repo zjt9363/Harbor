@@ -60,7 +60,42 @@ async function fetchJson(path: string, init: RequestInit, timeoutMs: number) {
       signal: controller.signal,
     })
     const text = await response.text()
-    const payload = text ? JSON.parse(text) : null
+    const contentType = response.headers.get('content-type') ?? ''
+    const isJson = contentType.toLowerCase().includes('application/json')
+    let payload: unknown = null
+
+    if (text) {
+      if (isJson) {
+        payload = JSON.parse(text)
+      } else if (response.ok) {
+        writeMainLog('ERROR', 'http', 'response was not json', {
+          path,
+          contentType,
+          preview: text.slice(0, 200),
+        })
+        throw new Error(`DeerFlow 返回了非 JSON 响应：${contentType || 'unknown content-type'}`)
+      } else {
+        let detail = `HTTP ${response.status}`
+        const trimmed = text.trim()
+
+        if (trimmed) {
+          if (trimmed.startsWith('<')) {
+            detail = `HTTP ${response.status}（DeerFlow 返回了 HTML 页面，可能请求到了前端路由）`
+          } else {
+            detail = trimmed.slice(0, 200)
+          }
+        }
+
+        writeMainLog('ERROR', 'http', 'request returned non-json error response', {
+          path,
+          status: response.status,
+          contentType,
+          preview: trimmed.slice(0, 200),
+        })
+        throw new Error(detail)
+      }
+    }
+
     writeMainLog('INFO', 'http', 'request completed', {
       path,
       status: response.status,
@@ -258,7 +293,7 @@ ipcMain.handle('chat:send', async (_event, request: ChatRequest): Promise<ChatRe
   })
 
   const payload = await fetchJson(
-    '/api/runs/wait',
+    `/api/threads/${encodeURIComponent(request.threadId)}/runs/wait`,
     {
       method: 'POST',
       headers: {

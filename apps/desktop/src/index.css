@@ -250,6 +250,12 @@ button {
   padding-right: 9rem;
 }
 
+.status-panel {
+  position: relative;
+  flex: 0 0 auto;
+  -webkit-app-region: no-drag;
+}
+
 .topbar-icon {
   display: grid;
   width: 1.9rem;
@@ -277,6 +283,8 @@ button {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
+  justify-content: flex-start;
+  width: 220px;
   min-height: 2.35rem;
   padding: 0 0.9rem;
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -284,6 +292,8 @@ button {
   background: rgba(123, 214, 166, 0.08);
   color: #9fe0b9;
   font-weight: 600;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .agent-badge.checking {
@@ -294,6 +304,43 @@ button {
 .agent-badge.offline {
   background: rgba(255, 108, 108, 0.1);
   color: #ffb0b0;
+}
+
+.agent-badge-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.status-detail-card {
+  position: absolute;
+  top: calc(100% + 0.55rem);
+  right: 0;
+  z-index: 10;
+  width: 320px;
+  padding: 0.85rem 0.9rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.95rem;
+  background: rgba(14, 16, 20, 0.98);
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  -webkit-app-region: no-drag;
+}
+
+.status-detail-title {
+  margin-bottom: 0.35rem;
+  color: #eef2fb;
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.status-detail-text {
+  color: #a8b1c2;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  word-break: break-word;
 }
 
 .workspace-strip {
