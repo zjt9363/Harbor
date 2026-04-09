@@ -239,6 +239,13 @@ models:
     request_timeout: 600.0
     max_retries: 5
     max_tokens: 8192
+    supports_thinking: true
+    supports_reasoning_effort: true
+    supports_vision: true
+    when_thinking_enabled:
+      extra_body:
+        thinking:
+          type: enabled
 ```
 
 再编辑：

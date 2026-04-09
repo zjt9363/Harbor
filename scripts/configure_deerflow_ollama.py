@@ -61,7 +61,7 @@ def choose_config_path(deerflow_dir: Path) -> Path:
 
 def update_config(config_path: Path) -> bool:
     if not config_path.exists():
-        raise FileNotFoundError(f"未找到配置文件：{config_path}")
+        raise FileNotFoundError(f"Configuration file not found: {config_path}")
 
     text = read_text(config_path)
     newline = detect_newline(text)
@@ -69,7 +69,7 @@ def update_config(config_path: Path) -> bool:
     lines = text.splitlines()
 
     if any(line.strip() == "- name: gemma4-e2b" for line in lines):
-        print(f"[config] 已存在 gemma4-e2b：{config_path}")
+        print(f"[config] gemma4-e2b already exists: {config_path}")
         return False
 
     insert_at = None
@@ -79,7 +79,7 @@ def update_config(config_path: Path) -> bool:
             break
 
     if insert_at is None:
-        raise RuntimeError(f"在 {config_path} 中未找到 models: 段落")
+        raise RuntimeError(f"Could not find the models: section in {config_path}")
 
     new_lines = lines[:insert_at] + MODEL_BLOCK_LINES + [""] + lines[insert_at:]
     output = newline.join(new_lines)
@@ -87,13 +87,13 @@ def update_config(config_path: Path) -> bool:
         output += newline
 
     write_text(config_path, output)
-    print(f"[config] 已插入 gemma4-e2b：{config_path}")
+    print(f"[config] Inserted gemma4-e2b: {config_path}")
     return True
 
 
 def update_env(env_path: Path) -> bool:
     if not env_path.exists():
-        raise FileNotFoundError(f"未找到环境变量文件：{env_path}")
+        raise FileNotFoundError(f"Environment file not found: {env_path}")
 
     text = read_text(env_path)
     newline = detect_newline(text)
@@ -101,7 +101,7 @@ def update_env(env_path: Path) -> bool:
     lines = text.splitlines()
 
     if any(line.strip().startswith("OLLAMA_API_KEY=") for line in lines):
-        print(f"[env] 已存在 OLLAMA_API_KEY：{env_path}")
+        print(f"[env] OLLAMA_API_KEY already exists: {env_path}")
         return False
 
     suffix = "" if text.endswith(("\r\n", "\n")) or text == "" else newline
@@ -109,17 +109,17 @@ def update_env(env_path: Path) -> bool:
     output = text + suffix + block
 
     write_text(env_path, output)
-    print(f"[env] 已插入 OLLAMA_API_KEY：{env_path}")
+    print(f"[env] Inserted OLLAMA_API_KEY: {env_path}")
     return True
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="为 DeerFlow 注入 Ollama Gemma4 配置")
+    parser = argparse.ArgumentParser(description="Inject Ollama Gemma4 configuration into DeerFlow")
     parser.add_argument(
         "--deerflow-dir",
         type=Path,
         default=Path(__file__).resolve().parents[1] / "services" / "deer-flow",
-        help="DeerFlow 目录路径，默认指向仓库内 services/deer-flow",
+        help="Path to the DeerFlow directory. Defaults to services/deer-flow inside this repository.",
     )
     return parser.parse_args()
 
@@ -129,7 +129,7 @@ def main() -> int:
     deerflow_dir = args.deerflow_dir.resolve()
 
     if not deerflow_dir.exists():
-        print(f"[ERROR] DeerFlow 目录不存在：{deerflow_dir}")
+        print(f"[ERROR] DeerFlow directory does not exist: {deerflow_dir}")
         return 1
 
     config_path = choose_config_path(deerflow_dir)
@@ -143,9 +143,9 @@ def main() -> int:
         return 1
 
     if not config_changed and not env_changed:
-        print("[done] 没有需要修改的内容。")
+        print("[done] No changes were needed.")
     else:
-        print("[done] 配置处理完成。")
+        print("[done] Configuration update completed.")
 
     return 0
 
