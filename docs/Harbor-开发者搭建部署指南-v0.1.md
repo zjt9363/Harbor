@@ -197,7 +197,7 @@ make config
 在 Ubuntu 中执行：
 
 ```bash
-bash /mnt/g/Harbor/scripts/start-ollama.sh
+bash /mnt/g/Harbor/scripts/start-ollama-gemma4-e2b.sh
 ```
 
 说明：

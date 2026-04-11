@@ -35,6 +35,17 @@ type DesktopConfig = {
   backendBaseUrl: string
 }
 
+type ModelOption = {
+  name: string
+  model: string
+  displayName: string | null
+  description: string | null
+  supportsThinking: boolean
+  supportsReasoningEffort: boolean
+}
+
+type ReasoningLevel = 'none' | 'low' | 'medium' | 'high'
+
 function getBackendBadgeLabel(status: BackendState['status'], isResponding: boolean) {
   if (isResponding) {
     return 'Responding'
@@ -72,6 +83,19 @@ function createConversation(title = '当前会话'): Conversation {
   }
 }
 
+function getReasoningLabel(level: ReasoningLevel) {
+  switch (level) {
+    case 'none':
+      return '关闭'
+    case 'low':
+      return 'Low'
+    case 'medium':
+      return 'Medium'
+    case 'high':
+      return 'High'
+  }
+}
+
 function App() {
   const [workspacePath, setWorkspacePath] = useState('E:\\Agent')
   const [draft, setDraft] = useState('')
@@ -89,6 +113,11 @@ function App() {
     status: 'checking',
     detail: 'Checking DeerFlow',
   })
+  const [models, setModels] = useState<ModelOption[]>([])
+  const [selectedModelName, setSelectedModelName] = useState('')
+  const [reasoningLevel, setReasoningLevel] = useState<ReasoningLevel>('medium')
+  const [isLoadingModels, setIsLoadingModels] = useState(false)
+  const [modelsError, setModelsError] = useState<string | null>(null)
   const messageEndRef = useRef<HTMLDivElement | null>(null)
 
   const refreshBackendStatus = async () => {
@@ -106,6 +135,37 @@ function App() {
             detail: status.error ?? 'DeerFlow Offline',
           },
     )
+  }
+
+  const loadModels = async () => {
+    logRenderer('INFO', 'models', 'loading models from deerflow')
+    setIsLoadingModels(true)
+    setModelsError(null)
+
+    try {
+      const payload = await window.harbor.listModels()
+      const nextModels = payload.models
+
+      setModels(nextModels)
+      setSelectedModelName((current) => {
+        if (current && nextModels.some((item) => item.name === current)) {
+          return current
+        }
+
+        return nextModels[0]?.name ?? ''
+      })
+      logRenderer('INFO', 'models', 'models loaded', {
+        count: nextModels.length,
+      })
+    } catch (error) {
+      const detail = error instanceof Error ? error.message : String(error)
+      setModels([])
+      setSelectedModelName('')
+      setModelsError(detail)
+      logRenderer('ERROR', 'models', 'loading models failed', { error: detail })
+    } finally {
+      setIsLoadingModels(false)
+    }
   }
 
   useEffect(() => {
@@ -139,8 +199,9 @@ function App() {
             : {
                 status: 'offline',
                 detail: status.error ?? 'DeerFlow Offline',
-              },
+            },
         )
+        void loadModels()
       })
       .catch((error) => {
         if (cancelled) {
@@ -154,6 +215,7 @@ function App() {
           status: 'offline',
           detail: error instanceof Error ? error.message : '配置初始化失败',
         })
+        void loadModels()
       })
 
     return () => {
@@ -198,7 +260,12 @@ function App() {
       path: snapshot.path,
     })
     await refreshBackendStatus()
+    await loadModels()
   }
+
+  const selectedModel = models.find((item) => item.name === selectedModelName) ?? null
+  const supportsThinkingSelection = Boolean(selectedModel?.supportsThinking)
+  const supportsReasoningEffortSelection = Boolean(selectedModel?.supportsReasoningEffort)
 
   const handleSend = async () => {
     const content = draft.trim()
@@ -241,15 +308,28 @@ function App() {
 
     try {
       const activeConversation = conversations[0]
+      const shouldSetThinking = supportsThinkingSelection
+      const thinkingEnabled = shouldSetThinking ? reasoningLevel !== 'none' : undefined
+      const reasoningEffort: 'none' | 'low' | 'medium' | 'high' | undefined =
+        shouldSetThinking && supportsReasoningEffortSelection
+          ? reasoningLevel
+          : undefined
+
       logRenderer('INFO', 'chat', 'sending user message', {
         threadId: activeConversation.threadId,
         messageLength: content.length,
         workspacePath,
+        modelName: selectedModelName || null,
+        thinkingEnabled: thinkingEnabled ?? null,
+        reasoningEffort: reasoningEffort ?? null,
       })
       const response = await window.harbor.sendMessage({
         threadId: activeConversation.threadId,
         message: content,
         workspacePath,
+        modelName: selectedModelName || undefined,
+        thinkingEnabled,
+        reasoningEffort,
       })
 
       const assistantMessage: Message = {
@@ -391,39 +471,87 @@ function App() {
             <span className="workspace-path">{workspacePath}</span>
           </section>
 
-          <section aria-live="polite" className="message-stream">
-            {messages.map((message) => (
-              <article className={`message-row ${message.role}`} key={message.id}>
-                <div className="message-role">{message.role === 'assistant' ? 'Harbor' : 'You'}</div>
-                <div className="message-content">{message.content}</div>
-              </article>
-            ))}
-            {isResponding ? (
-              <article className="message-row assistant pending">
-                <div className="message-role">Harbor</div>
-                <div className="message-content">正在生成回复...</div>
-              </article>
-            ) : null}
-            <div ref={messageEndRef} />
-          </section>
+          <div className="chat-panel">
+            <section aria-live="polite" className="message-stream">
+              {messages.map((message) => (
+                <article className={`message-row ${message.role}`} key={message.id}>
+                  <div className="message-content">{message.content}</div>
+                </article>
+              ))}
+              {isResponding ? (
+                <article className="message-row assistant pending">
+                  <div className="message-content">正在生成回复...</div>
+                </article>
+              ) : null}
+              <div ref={messageEndRef} />
+            </section>
 
-          <footer className="composer-shell">
-            <div className="composer-hint">按 Enter 发送，Shift + Enter 换行</div>
-            <div className="composer">
-              <textarea
-                className="composer-input"
-                onChange={(event) => setDraft(event.target.value)}
-                onKeyDown={handleComposerKeyDown}
-                placeholder="输入消息，发送到 DeerFlow..."
-                rows={4}
-                value={draft}
-              />
-              <button className="send-button" disabled={!draft.trim() || isResponding} onClick={handleSend} type="button">
-                <SendHorizontal size={16} />
-                <span>发送</span>
-              </button>
-            </div>
-          </footer>
+            <footer className="composer-shell">
+              <div className="composer-hint">按 Enter 发送，Shift + Enter 换行</div>
+              <div className="composer">
+                <textarea
+                  className="composer-input"
+                  onChange={(event) => setDraft(event.target.value)}
+                  onKeyDown={handleComposerKeyDown}
+                  placeholder="输入消息，发送到 DeerFlow..."
+                  rows={4}
+                  value={draft}
+                />
+                <button className="send-button" disabled={!draft.trim() || isResponding} onClick={handleSend} type="button">
+                  <SendHorizontal size={16} />
+                  <span>发送</span>
+                </button>
+              </div>
+              <div className="composer-controls">
+                <div className="composer-control-group">
+                  <label className="composer-control">
+                    <span className="composer-control-label">模型</span>
+                    <select
+                      className="composer-select"
+                      disabled={isLoadingModels || models.length === 0}
+                      onChange={(event) => setSelectedModelName(event.target.value)}
+                      value={selectedModelName}
+                    >
+                      {models.length > 0 ? (
+                        models.map((model) => (
+                          <option key={model.name} value={model.name}>
+                            {model.displayName ?? model.name}
+                          </option>
+                        ))
+                    ) : (
+                      <option value="">
+                          {isLoadingModels ? '模型加载中...' : '没有可用模型'}
+                      </option>
+                    )}
+                  </select>
+                  </label>
+
+                  <label className="composer-control">
+                    <span className="composer-control-label">思考</span>
+                    <select
+                      className="composer-select"
+                      disabled={!supportsThinkingSelection}
+                      onChange={(event) => setReasoningLevel(event.target.value as ReasoningLevel)}
+                      value={reasoningLevel}
+                    >
+                      <option value="none">关闭</option>
+                      <option value="low">Low</option>
+                      <option value="medium">Medium</option>
+                      <option value="high">High</option>
+                    </select>
+                  </label>
+                </div>
+
+                <div className={`composer-inline-status ${modelsError ? 'error' : ''}`}>
+                  {modelsError
+                    ? '模型列表读取失败'
+                    : selectedModel
+                      ? `${selectedModel.displayName ?? selectedModel.name} · ${supportsThinkingSelection ? `思考 ${getReasoningLabel(reasoningLevel)}` : '不支持思考'}`
+                      : '将使用 DeerFlow 默认模型'}
+                </div>
+              </div>
+            </footer>
+          </div>
         </main>
       </div>
 

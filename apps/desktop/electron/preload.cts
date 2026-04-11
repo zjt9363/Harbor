@@ -8,5 +8,14 @@ contextBridge.exposeInMainWorld('harbor', {
   updateConfig: (config: { backendBaseUrl: string }) => ipcRenderer.invoke('config:update', config),
   openConfigFile: () => ipcRenderer.invoke('config:open-file'),
   getBackendStatus: () => ipcRenderer.invoke('backend:status'),
-  sendMessage: (payload: { threadId: string; message: string; workspacePath: string }) => ipcRenderer.invoke('chat:send', payload),
+  listModels: () => ipcRenderer.invoke('models:list'),
+  sendMessage: (payload: {
+    threadId: string
+    message: string
+    workspacePath: string
+    modelName?: string
+    reasoningEffort?: 'none' | 'low' | 'medium' | 'high'
+    thinkingEnabled?: boolean
+  }) =>
+    ipcRenderer.invoke('chat:send', payload),
 })

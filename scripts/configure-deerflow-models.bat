@@ -19,7 +19,7 @@ if not defined PYTHON_CMD (
   goto :finish
 )
 
-%PYTHON_CMD% "%~dp0configure_deerflow_ollama.py" %*
+%PYTHON_CMD% "%~dp0configure_deerflow_models.py" %*
 set "EXIT_CODE=%errorlevel%"
 
 :finish

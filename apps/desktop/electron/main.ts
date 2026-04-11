@@ -30,12 +30,28 @@ type ChatRequest = {
   threadId: string
   message: string
   workspacePath: string
+  modelName?: string
+  reasoningEffort?: 'none' | 'low' | 'medium' | 'high'
+  thinkingEnabled?: boolean
 }
 
 type ChatResponse = {
   threadId: string
   reply: string
   title: string | null
+}
+
+type DeerFlowModel = {
+  name: string
+  model: string
+  displayName: string | null
+  description: string | null
+  supportsThinking: boolean
+  supportsReasoningEffort: boolean
+}
+
+type ModelsListResponse = {
+  models: DeerFlowModel[]
 }
 
 function buildDeerFlowUrl(path: string) {
@@ -285,12 +301,58 @@ ipcMain.handle('backend:status', async (): Promise<DeerFlowStatus> => {
   }
 })
 
+ipcMain.handle('models:list', async (): Promise<ModelsListResponse> => {
+  const payload = await fetchJson('/api/models', { method: 'GET' }, 10_000)
+
+  if (!payload || typeof payload !== 'object' || !('models' in payload) || !Array.isArray(payload.models)) {
+    throw new Error('DeerFlow models response is invalid.')
+  }
+
+  const models = payload.models
+    .map((item) => {
+      if (!item || typeof item !== 'object' || typeof item.name !== 'string') {
+        return null
+      }
+
+      const name = item.name.trim()
+      if (!name) {
+        return null
+      }
+
+      return {
+        name,
+        model: typeof item.model === 'string' && item.model.trim() ? item.model : name,
+        displayName: typeof item.display_name === 'string' ? item.display_name : null,
+        description: typeof item.description === 'string' ? item.description : null,
+        supportsThinking: Boolean(item.supports_thinking),
+        supportsReasoningEffort: Boolean(item.supports_reasoning_effort),
+      } satisfies DeerFlowModel
+    })
+    .filter((item): item is DeerFlowModel => item !== null)
+
+  return { models }
+})
+
 ipcMain.handle('chat:send', async (_event, request: ChatRequest): Promise<ChatResponse> => {
   writeMainLog('INFO', 'chat', 'sending message to deerflow', {
     threadId: request.threadId,
     workspacePath: request.workspacePath,
     messageLength: request.message.length,
   })
+
+  const configurable: Record<string, unknown> = {
+    thread_id: request.threadId,
+  }
+
+  if (request.modelName?.trim()) {
+    configurable.model_name = request.modelName.trim()
+  }
+  if (request.reasoningEffort) {
+    configurable.reasoning_effort = request.reasoningEffort
+  }
+  if (typeof request.thinkingEnabled === 'boolean') {
+    configurable.thinking_enabled = request.thinkingEnabled
+  }
 
   const payload = await fetchJson(
     `/api/threads/${encodeURIComponent(request.threadId)}/runs/wait`,
@@ -313,9 +375,7 @@ ipcMain.handle('chat:send', async (_event, request: ChatRequest): Promise<ChatRe
           workspace_path: request.workspacePath,
         },
         config: {
-          configurable: {
-            thread_id: request.threadId,
-          },
+          configurable,
         },
       }),
     },

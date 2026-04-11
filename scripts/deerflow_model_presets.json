@@ -1,0 +1,30 @@
+{
+  "models": [
+    {
+      "id": "gemma4-e2b",
+      "label": "Gemma 4 E2B (Ollama)",
+      "config_lines": [
+        "  - name: gemma4-e2b",
+        "    display_name: Gemma 4 E2B (Ollama)",
+        "    use: langchain_openai:ChatOpenAI",
+        "    model: gemma4:e2b",
+        "    api_key: $OLLAMA_API_KEY",
+        "    base_url: http://host.docker.internal:11434/v1",
+        "    request_timeout: 600.0",
+        "    max_retries: 5",
+        "    max_tokens: 8192",
+        "    supports_thinking: true",
+        "    supports_reasoning_effort: true",
+        "    supports_vision: true",
+        "    when_thinking_enabled:",
+        "      extra_body:",
+        "        thinking:",
+        "          type: enabled"
+      ],
+      "env_lines": [
+        "# Ollama",
+        "OLLAMA_API_KEY=ollama"
+      ]
+    }
+  ]
+}

@@ -26,7 +26,24 @@ declare global {
         service: string | null
         error?: string
       }>
-      sendMessage: (payload: { threadId: string; message: string; workspacePath: string }) => Promise<{
+      listModels: () => Promise<{
+        models: Array<{
+          name: string
+          model: string
+          displayName: string | null
+          description: string | null
+          supportsThinking: boolean
+          supportsReasoningEffort: boolean
+        }>
+      }>
+      sendMessage: (payload: {
+        threadId: string
+        message: string
+        workspacePath: string
+        modelName?: string
+        reasoningEffort?: 'none' | 'low' | 'medium' | 'high'
+        thinkingEnabled?: boolean
+      }) => Promise<{
         threadId: string
         reply: string
         title: string | null

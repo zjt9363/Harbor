@@ -3,5 +3,6 @@
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/services/deer-flow" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/services/models/Qwen3.5-27B-Claude-4.6-Opus-Reasoning-Distilled" vcs="Git" />
   </component>
 </project>
